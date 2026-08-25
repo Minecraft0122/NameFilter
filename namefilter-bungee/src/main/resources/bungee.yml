@@ -1,0 +1,5 @@
+name: NameFilter
+version: '1.0.0'
+main: com.namefilter.bungee.NameFilterBungeePlugin
+description: Check player name when join in server
+author: NameFilter

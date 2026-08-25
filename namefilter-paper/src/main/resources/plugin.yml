@@ -1,0 +1,6 @@
+name: NameFilter
+version: '1.0.0'
+main: com.namefilter.paper.NameFilterPaperPlugin
+api-version: '1.21'
+description: Check player name when join in server
+author: NameFilter

@@ -1,0 +1,14 @@
+# Maven output
+target/
+
+# Generated Maven inspection output
+core-effective.xml
+
+# IDE metadata
+.idea/
+*.iml
+.vscode/
+
+# Local plugin runtime data
+log/
+plugins/

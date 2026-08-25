@@ -1,0 +1,3 @@
+# message: reject with the configured text; silent: reject with an empty reason.
+mode: message
+rejection-message: Your name contains a forbidden word.
