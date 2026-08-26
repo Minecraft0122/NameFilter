@@ -29,7 +29,7 @@ import java.util.Properties;
 @Plugin(
         id = "namefilter",
         name = "NameFilter",
-        version = "1.0.0",
+        version = "1.1.0",
         description = "Check player name when join in server",
         authors = "NameFilter"
 )

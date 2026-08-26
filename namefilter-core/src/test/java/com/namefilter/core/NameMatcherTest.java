@@ -41,6 +41,28 @@ class NameMatcherTest {
     }
 
     @Test
+    void defaultMatcherRejectsCharactersOutsideTheUsernamePattern() {
+        NameMatcher matcher = NameMatcher.defaults();
+
+        assertFalse(matcher.isForbidden("Player_123"));
+        assertTrue(matcher.isForbidden("Player-123"));
+        assertEquals("-", matcher.match("Player-123").matchedText());
+        assertTrue(matcher.isForbidden("玩家"));
+        assertEquals("😀", matcher.match("Player😀").matchedText());
+    }
+
+    @Test
+    void namePatternCanBeDisabledWithoutDisablingForbiddenWords() {
+        NameFilterConfig config = NameFilterConfig.builder()
+                .enforceNamePattern(false)
+                .build();
+        NameMatcher matcher = new NameMatcher(config);
+
+        assertFalse(matcher.isForbidden("Player-123"));
+        assertTrue(matcher.isForbidden("PlayerTrump"));
+    }
+
+    @Test
     void emptyListNeverMatches() {
         NameMatcher matcher = new NameMatcher(List.of());
 

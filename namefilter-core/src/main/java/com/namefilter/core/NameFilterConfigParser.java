@@ -37,6 +37,16 @@ public final class NameFilterConfigParser {
         if (message != null && !String.valueOf(message).isBlank()) {
             builder.rejectionMessage(String.valueOf(message));
         }
+
+        Object namePattern = first(values,
+                "enforcenamepattern",
+                "namepatternenabled",
+                "checknamepattern",
+                "validatenamecharacters",
+                "validatenamepattern");
+        if (namePattern != null) {
+            builder.enforceNamePattern(parseBoolean(namePattern, true));
+        }
         return builder.build();
     }
 
@@ -68,5 +78,22 @@ public final class NameFilterConfigParser {
             }
         }
         return null;
+    }
+
+    /**
+     * Parse booleans consistently across YAML values and Java properties.
+     * Unknown values retain the secure default instead of silently disabling
+     * username validation.
+     */
+    private static boolean parseBoolean(Object value, boolean defaultValue) {
+        if (value instanceof Boolean booleanValue) {
+            return booleanValue;
+        }
+        String text = String.valueOf(value).trim().toLowerCase(java.util.Locale.ROOT);
+        return switch (text) {
+            case "true", "yes", "on", "1" -> true;
+            case "false", "no", "off", "0" -> false;
+            default -> defaultValue;
+        };
     }
 }
