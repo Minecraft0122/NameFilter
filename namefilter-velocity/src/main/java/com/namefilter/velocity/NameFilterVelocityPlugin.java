@@ -2,6 +2,7 @@ package com.namefilter.velocity;
 
 import com.google.inject.Inject;
 import com.namefilter.core.DailyAuditLogger;
+import com.namefilter.core.ForbiddenPatternLoader;
 import com.namefilter.core.HandlingMode;
 import com.namefilter.core.MatchResult;
 import com.namefilter.core.NameFilterConfig;
@@ -29,7 +30,7 @@ import java.util.Properties;
 @Plugin(
         id = "namefilter",
         name = "NameFilter",
-        version = "1.1.0",
+        version = "1.2.0",
         description = "Check player name when join in server",
         authors = "NameFilter"
 )
@@ -55,7 +56,14 @@ public final class NameFilterVelocityPlugin {
         } catch (IOException error) {
             throw new IllegalStateException("Could not load NameFilter configuration", error);
         }
-        this.matcher = new NameMatcher(filterConfig);
+        try {
+            this.matcher = new NameMatcher(
+                    filterConfig,
+                    ForbiddenPatternLoader.load(
+                            dataDirectory.resolve(ForbiddenPatternLoader.FILE_NAME)));
+        } catch (IOException error) {
+            throw new IllegalStateException("Could not load forbidden name patterns", error);
+        }
         this.auditLogger = new DailyAuditLogger(dataDirectory.resolve("log"));
     }
 

@@ -2,34 +2,18 @@ package com.namefilter.core;
 
 import java.util.List;
 
-/** Internal forbidden-name policy expressed as regular-expression fragments. */
+/**
+ * Compatibility access to the bundled forbidden-name policy.
+ *
+ * <p>The authoritative defaults live in {@code forbidden-patterns.txt}. The
+ * resource is loaded once when this class is initialized; platform adapters
+ * copy it to their data directory and load the user-owned file during
+ * startup.</p>
+ */
 public final class BuiltInForbiddenPatterns {
     private BuiltInForbiddenPatterns() {
     }
 
-    /**
-     * Immutable regex fragments compiled by {@link NameMatcher} into one
-     * pattern. Separators are accepted in common Latin transliterations to
-     * prevent trivial underscore or punctuation bypasses.
-     */
-    public static final List<String> PATTERNS = List.of(
-            "习近平|習近平|xi[\\W_]*jin[\\W_]*ping",
-            "毛泽东|毛澤東|mao[\\W_]*ze[\\W_]*dong",
-            "邓小平|鄧小平|deng[\\W_]*xiao[\\W_]*ping",
-            "江泽民|江澤民|jiang[\\W_]*ze[\\W_]*min",
-            "胡锦涛|胡錦濤|hu[\\W_]*jin[\\W_]*tao",
-            "李克强|李克強|li[\\W_]*ke[\\W_]*qiang",
-            "李强|李強|li[\\W_]*qiang",
-            "金正恩|kim[\\W_]*jong[\\W_]*un",
-            "普京|(?:vladimir[\\W_]*)?putin",
-            "特朗普|donald[\\W_]*trump|trump",
-            "拜登|joe[\\W_]*biden|biden",
-            "admin(?:istrator)?|moderator|owner",
-            "f[\\W_]*u[\\W_]*c[\\W_]*k",
-            "s[\\W_]*h[\\W_]*i[\\W_]*t",
-            "c[\\W_]*u[\\W_]*n[\\W_]*t",
-            "n[\\W_]*i[\\W_]*g[\\W_]*g[\\W_]*e[\\W_]*r",
-            "porn",
-            "傻逼|操你|妈的"
-    );
+    /** Immutable regex fragments loaded from the bundled resource once. */
+    public static final List<String> PATTERNS = ForbiddenPatternLoader.loadBundled();
 }

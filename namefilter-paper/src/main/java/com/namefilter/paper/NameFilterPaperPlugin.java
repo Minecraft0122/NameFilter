@@ -2,6 +2,7 @@ package com.namefilter.paper;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.namefilter.core.DailyAuditLogger;
+import com.namefilter.core.ForbiddenPatternLoader;
 import com.namefilter.core.HandlingMode;
 import com.namefilter.core.MatchResult;
 import com.namefilter.core.NameFilterConfig;
@@ -15,6 +16,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
+
 /** Paper entry point. */
 public final class NameFilterPaperPlugin extends JavaPlugin implements Listener {
     private NameFilterConfig filterConfig;
@@ -25,7 +28,14 @@ public final class NameFilterPaperPlugin extends JavaPlugin implements Listener 
     public void onEnable() {
         saveDefaultConfig();
         this.filterConfig = NameFilterConfigParser.parse(getConfig().getValues(false));
-        this.matcher = new NameMatcher(filterConfig);
+        try {
+            this.matcher = new NameMatcher(
+                    filterConfig,
+                    ForbiddenPatternLoader.load(
+                            getDataFolder().toPath().resolve(ForbiddenPatternLoader.FILE_NAME)));
+        } catch (IOException error) {
+            throw new IllegalStateException("Could not load forbidden name patterns", error);
+        }
         this.auditLogger = new DailyAuditLogger(getDataFolder().toPath().resolve("log"));
         getServer().getPluginManager().registerEvents(this, this);
     }

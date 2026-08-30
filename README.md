@@ -7,9 +7,9 @@ NameFilter 在玩家登录前检查用户名。它使用启动时预编译的正
 由于 Paper、Velocity、BungeeCord 的插件 API 互不兼容，工程会生成三个独立插件包；请只把对应平台的包放入对应目录：
 
 ```text
-namefilter-paper/target/namefilter-paper-1.1.0.jar       -> Paper plugins/
-namefilter-velocity/target/namefilter-velocity-1.1.0.jar -> Velocity plugins/
-namefilter-bungee/target/namefilter-bungee-1.1.0.jar     -> BungeeCord plugins/
+namefilter-paper/target/namefilter-paper-1.2.0.jar       -> Paper plugins/
+namefilter-velocity/target/namefilter-velocity-1.2.0.jar -> Velocity plugins/
+namefilter-bungee/target/namefilter-bungee-1.2.0.jar     -> BungeeCord plugins/
 ```
 
 使用 Java 21 和 Maven 构建：
@@ -38,7 +38,11 @@ enforce-name-pattern: true
 
 `enforce-name-pattern` 默认开启，要求玩家名字整体匹配 `[a-zA-Z0-9_]*`，也就是只允许 ASCII 英文字母、数字和下划线。这样可以避免某些子服不接受特殊字符时，玩家先通过代理再在子服登录失败。若本服或子服明确支持其他字符，可在配置中设为 `false` 关闭这项限制；违禁词检查仍然继续执行。
 
-违禁规则位于共享核心的 `BuiltInForbiddenPatterns`，目前覆盖常见的领导人姓名（中英文及常见分隔符变体）、管理身份冒充词和常见辱骂词。规则按正则表达式匹配，大小写不敏感；服务启动时只编译一次，登录检查不会重复编译规则或同步写文件。
+### 违禁名单
+
+插件首次启动时会在插件数据目录生成 `forbidden-patterns.txt`。Paper 通常位于 `plugins/NameFilter/forbidden-patterns.txt`，Velocity/BungeeCord 位于各自插件数据目录下的同名文件。文件以 UTF-8 编码，每行一个 Java 正则表达式片段；空行和以 `#` 开头的行会被忽略。普通名称可以直接写入，例如 `badname`；现有默认规则中的 `|`、`[\W_]*` 等写法用于表达多个变体和可选分隔符。
+
+文件只在插件启动时读取并预编译一次，玩家登录检查不会访问磁盘。修改名单后需要重启对应插件；升级时不会覆盖已经存在的用户文件。清空文件（只保留注释或空行）表示关闭违禁词名单，但字符格式校验仍由 `enforce-name-pattern` 单独控制。若文件包含无效正则，插件会在启动时报告文件来源；单行格式错误还会标明行号，并停止启用，避免悄悄使用不完整的名单。
 
 ## 日志
 

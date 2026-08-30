@@ -15,7 +15,6 @@ import java.util.regex.Pattern;
  */
 public final class NameMatcher {
     private static final Pattern NEVER_MATCH = Pattern.compile("(?!x)x");
-    private static final Pattern DEFAULT_PATTERN = compile(BuiltInForbiddenPatterns.PATTERNS);
     private static final Pattern VALID_NAME_PATTERN = Pattern.compile(
             NameFilterConfig.DEFAULT_NAME_PATTERN);
 
@@ -25,22 +24,34 @@ public final class NameMatcher {
 
     public NameMatcher(NameFilterConfig config) {
         Objects.requireNonNull(config, "config");
-        this.forbiddenPatterns = BuiltInForbiddenPatterns.PATTERNS;
-        this.pattern = DEFAULT_PATTERN;
+        this.forbiddenPatterns = DefaultPatternHolder.PATTERNS;
+        this.pattern = DefaultPatternHolder.PATTERN;
+        this.enforceNamePattern = config.enforceNamePattern();
+    }
+
+    /** Construct a matcher with a configuration and an already loaded pattern list. */
+    public NameMatcher(NameFilterConfig config, Collection<String> forbiddenPatterns) {
+        Objects.requireNonNull(config, "config");
+        this.forbiddenPatterns = normalizePatterns(forbiddenPatterns);
+        this.pattern = compile(this.forbiddenPatterns);
         this.enforceNamePattern = config.enforceNamePattern();
     }
 
     /** Construct a matcher from raw regular-expression fragments. */
     public NameMatcher(Collection<String> forbiddenPatterns) {
+        this.forbiddenPatterns = normalizePatterns(forbiddenPatterns);
+        this.pattern = compile(this.forbiddenPatterns);
+        this.enforceNamePattern = false;
+    }
+
+    private static List<String> normalizePatterns(Collection<String> forbiddenPatterns) {
         Objects.requireNonNull(forbiddenPatterns, "forbiddenPatterns");
-        this.forbiddenPatterns = forbiddenPatterns.stream()
+        return forbiddenPatterns.stream()
                 .filter(Objects::nonNull)
                 .map(String::trim)
                 .filter(value -> !value.isEmpty())
                 .distinct()
                 .toList();
-        this.pattern = compile(this.forbiddenPatterns);
-        this.enforceNamePattern = false;
     }
 
     public static NameMatcher defaults() {
@@ -49,7 +60,7 @@ public final class NameMatcher {
 
     /** The compiled built-in forbidden-word regex, useful for diagnostics/metrics. */
     public static Pattern defaultPattern() {
-        return DEFAULT_PATTERN;
+        return DefaultPatternHolder.PATTERN;
     }
 
     public MatchResult match(String playerName) {
@@ -127,6 +138,14 @@ public final class NameMatcher {
 
     public List<String> getForbiddenPatterns() {
         return forbiddenPatterns();
+    }
+
+    private static final class DefaultPatternHolder {
+        private static final List<String> PATTERNS = BuiltInForbiddenPatterns.PATTERNS;
+        private static final Pattern PATTERN = compile(PATTERNS);
+
+        private DefaultPatternHolder() {
+        }
     }
 
     private static Pattern compile(List<String> patterns) {

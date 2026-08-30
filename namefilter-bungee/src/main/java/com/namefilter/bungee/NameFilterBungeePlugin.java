@@ -1,6 +1,7 @@
 package com.namefilter.bungee;
 
 import com.namefilter.core.DailyAuditLogger;
+import com.namefilter.core.ForbiddenPatternLoader;
 import com.namefilter.core.HandlingMode;
 import com.namefilter.core.MatchResult;
 import com.namefilter.core.NameFilterConfig;
@@ -36,7 +37,14 @@ public final class NameFilterBungeePlugin extends Plugin implements Listener {
         } catch (IOException error) {
             throw new IllegalStateException("Could not load NameFilter configuration", error);
         }
-        this.matcher = new NameMatcher(filterConfig);
+        try {
+            this.matcher = new NameMatcher(
+                    filterConfig,
+                    ForbiddenPatternLoader.load(
+                            getDataFolder().toPath().resolve(ForbiddenPatternLoader.FILE_NAME)));
+        } catch (IOException error) {
+            throw new IllegalStateException("Could not load forbidden name patterns", error);
+        }
         this.auditLogger = new DailyAuditLogger(getDataFolder().toPath().resolve("log"));
         getProxy().getPluginManager().registerListener(this, this);
     }
