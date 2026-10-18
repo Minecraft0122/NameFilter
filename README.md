@@ -40,9 +40,11 @@ enforce-name-pattern: true
 
 ### 违禁名单
 
+`forbidden-patterns.txt` 是可自定义的违规名称名单，编辑后执行 `/namefilter reload`（别名 `/nf reload`）即可生效，无需重启。Paper、Velocity 和 BungeeCord 都支持此命令，权限为 `namefilter.admin`；Paper 默认仅 OP 可用，代理端请通过权限系统授予。
+
 插件首次启动时会在插件数据目录生成 `forbidden-patterns.txt`。Paper 通常位于 `plugins/NameFilter/forbidden-patterns.txt`，Velocity/BungeeCord 位于各自插件数据目录下的同名文件。文件以 UTF-8 编码，每行一个 Java 正则表达式片段；空行和以 `#` 开头的行会被忽略。普通名称可以直接写入，例如 `badname`；现有默认规则中的 `|`、`[\W_]*` 等写法用于表达多个变体和可选分隔符。
 
-文件只在插件启动时读取并预编译一次，玩家登录检查不会访问磁盘。修改名单后需要重启对应插件；升级时不会覆盖已经存在的用户文件。清空文件（只保留注释或空行）表示关闭违禁词名单，但字符格式校验仍由 `enforce-name-pattern` 单独控制。若文件包含无效正则，插件会在启动时报告文件来源；单行格式错误还会标明行号，并停止启用，避免悄悄使用不完整的名单。
+文件会在插件启动或执行重载时读取并预编译，玩家登录检查不会访问磁盘。清空文件（只保留注释或空行）表示关闭违禁词名单，但字符格式校验仍由 `enforce-name-pattern` 单独控制。若配置或名单文件无效，重载会提示错误并保留上一版运行设置；名单中的正则格式错误会报告文件和行号。
 
 ## 日志
 

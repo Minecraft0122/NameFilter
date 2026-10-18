@@ -1,6 +1,6 @@
 # NameFilter forbidden-name patterns (one regular-expression fragment per line).
 # Blank lines and lines beginning with # are ignored.
-# Edit this file in the plugin data directory and restart the plugin to apply changes.
+# Edit this file in the plugin data directory, then run /namefilter reload to apply changes.
 习近平|習近平|xi[\W_]*jin[\W_]*ping
 毛泽东|毛澤東|mao[\W_]*ze[\W_]*dong
 邓小平|鄧小平|deng[\W_]*xiao[\W_]*ping

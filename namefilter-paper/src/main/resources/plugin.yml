@@ -4,3 +4,13 @@ main: com.namefilter.paper.NameFilterPaperPlugin
 api-version: '1.21'
 description: Check player name when join in server
 author: NameFilter
+commands:
+  namefilter:
+    description: Reload NameFilter settings and forbidden patterns.
+    usage: /namefilter reload
+    aliases: [nf]
+    permission: namefilter.admin
+permissions:
+  namefilter.admin:
+    description: Allows reloading NameFilter.
+    default: op

@@ -7,7 +7,9 @@ import com.namefilter.core.HandlingMode;
 import com.namefilter.core.MatchResult;
 import com.namefilter.core.NameFilterConfig;
 import com.namefilter.core.NameFilterConfigParser;
-import com.namefilter.core.NameMatcher;
+import com.namefilter.core.NameFilterRuntime;
+import com.velocitypowered.api.command.SimpleCommand;
+import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.event.ResultedEvent.ComponentResult;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.LoginEvent;
@@ -16,6 +18,7 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -39,32 +42,31 @@ public final class NameFilterVelocityPlugin {
 
     private final Path dataDirectory;
     private final Logger logger;
-    private NameFilterConfig filterConfig;
-    private NameMatcher matcher;
+    private final ProxyServer proxyServer;
+    private NameFilterRuntime runtime;
     private DailyAuditLogger auditLogger;
 
     @Inject
-    public NameFilterVelocityPlugin(@DataDirectory Path dataDirectory, Logger logger) {
+    public NameFilterVelocityPlugin(@DataDirectory Path dataDirectory, Logger logger, ProxyServer proxyServer) {
         this.dataDirectory = dataDirectory;
         this.logger = logger;
+        this.proxyServer = proxyServer;
     }
 
     @Subscribe
     public void onProxyInitialize(ProxyInitializeEvent event) {
         try {
-            this.filterConfig = loadConfig();
+            NameFilterConfig config = loadConfig();
+            this.runtime = new NameFilterRuntime(
+                    config,
+                    ForbiddenPatternLoader.load(dataDirectory.resolve(ForbiddenPatternLoader.FILE_NAME)));
         } catch (IOException error) {
-            throw new IllegalStateException("Could not load NameFilter configuration", error);
-        }
-        try {
-            this.matcher = new NameMatcher(
-                    filterConfig,
-                    ForbiddenPatternLoader.load(
-                            dataDirectory.resolve(ForbiddenPatternLoader.FILE_NAME)));
-        } catch (IOException error) {
-            throw new IllegalStateException("Could not load forbidden name patterns", error);
+            throw new IllegalStateException("Could not load NameFilter configuration or forbidden patterns", error);
         }
         this.auditLogger = new DailyAuditLogger(dataDirectory.resolve("log"));
+        proxyServer.getCommandManager().register(
+                proxyServer.getCommandManager().metaBuilder("namefilter").plugin(this).aliases("nf").build(),
+                new ReloadCommand());
     }
 
     @Subscribe
@@ -74,18 +76,19 @@ public final class NameFilterVelocityPlugin {
         }
 
         String playerName = event.getPlayer().getUsername();
-        MatchResult match = matcher.match(playerName);
+        NameFilterRuntime.Snapshot state = runtime.snapshot();
+        MatchResult match = state.matcher().match(playerName);
         if (!match.isMatch()) {
             return;
         }
 
-        Component reason = filterConfig.handlingMode() == HandlingMode.SILENT
+        Component reason = state.config().handlingMode() == HandlingMode.SILENT
                 ? Component.empty()
-                : Component.text(filterConfig.rejectionMessage());
+                : Component.text(state.config().rejectionMessage());
         event.setResult(ComponentResult.denied(reason));
 
         String remoteAddress = String.valueOf(event.getPlayer().getRemoteAddress());
-        auditLogger.record(playerName, remoteAddress, match, "Velocity", filterConfig.handlingMode())
+        auditLogger.record(playerName, remoteAddress, match, "Velocity", state.config().handlingMode())
                 .exceptionally(error -> {
                     logger.warn("Could not write NameFilter audit record", error);
                     return null;
@@ -116,5 +119,35 @@ public final class NameFilterVelocityPlugin {
             properties.load(input);
         }
         return NameFilterConfigParser.parse(properties);
+    }
+
+    private final class ReloadCommand implements SimpleCommand {
+        @Override
+        public void execute(Invocation invocation) {
+            if (invocation.arguments().length != 1
+                    || !invocation.arguments()[0].equalsIgnoreCase("reload")) {
+                invocation.source().sendMessage(Component.text("Usage: /namefilter reload", NamedTextColor.YELLOW));
+                return;
+            }
+            if (!invocation.source().hasPermission("namefilter.admin")) {
+                invocation.source().sendMessage(Component.text("You do not have permission.", NamedTextColor.RED));
+                return;
+            }
+            try {
+                NameFilterConfig config = loadConfig();
+                runtime.reload(config, dataDirectory.resolve(ForbiddenPatternLoader.FILE_NAME));
+                invocation.source().sendMessage(Component.text(
+                        "NameFilter configuration and forbidden patterns reloaded.", NamedTextColor.GREEN));
+            } catch (IOException | RuntimeException error) {
+                logger.warn("Could not reload NameFilter; previous settings remain active", error);
+                invocation.source().sendMessage(Component.text(
+                        "NameFilter reload failed; the previous settings remain active.", NamedTextColor.RED));
+            }
+        }
+
+        @Override
+        public boolean hasPermission(Invocation invocation) {
+            return invocation.source().hasPermission("namefilter.admin");
+        }
     }
 }
