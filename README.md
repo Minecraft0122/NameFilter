@@ -7,9 +7,9 @@ NameFilter 在玩家登录前检查用户名。它使用启动时预编译的正
 由于 Paper、Velocity、BungeeCord 的插件 API 互不兼容，工程会生成三个独立插件包；请只把对应平台的包放入对应目录：
 
 ```text
-namefilter-paper/target/namefilter-paper-1.2.0.jar       -> Paper plugins/
-namefilter-velocity/target/namefilter-velocity-1.2.0.jar -> Velocity plugins/
-namefilter-bungee/target/namefilter-bungee-1.2.0.jar     -> BungeeCord plugins/
+namefilter-paper/target/namefilter-paper-1.3.0.jar       -> Paper plugins/
+namefilter-velocity/target/namefilter-velocity-1.3.0.jar -> Velocity plugins/
+namefilter-bungee/target/namefilter-bungee-1.3.0.jar     -> BungeeCord plugins/
 ```
 
 使用 Java 21 和 Maven 构建：
