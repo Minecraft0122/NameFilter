@@ -19,3 +19,12 @@ c[\W_]*u[\W_]*n[\W_]*t
 n[\W_]*i[\W_]*g[\W_]*g[\W_]*e[\W_]*r
 porn
 傻逼|操你|妈的
+ruo[\W_]*zhi
+cao[\W_]*si[\W_]*n[\W_]*m[\W_]*quan[\W_]*jia
+i[\W_]*d[\W_]*i[\W_]*o[\W_]*t|m[\W_]*o[\W_]*r[\W_]*o[\W_]*n|s[\W_]*t[\W_]*u[\W_]*p[\W_]*i[\W_]*d
+d[\W_]*u[\W_]*m[\W_]*b[\W_]*a[\W_]*s[\W_]*s|a[\W_]*s[\W_]*s[\W_]*h[\W_]*o[\W_]*l[\W_]*e|b[\W_]*a[\W_]*s[\W_]*t[\W_]*a[\W_]*r[\W_]*d
+b[\W_]*i[\W_]*t[\W_]*c[\W_]*h|w[\W_]*h[\W_]*o[\W_]*r[\W_]*e|s[\W_]*l[\W_]*u[\W_]*t
+白痴|笨蛋|废物|廢物|混蛋|王八蛋|狗屎|垃圾|操你妈|草泥马
+bai[\W_]*chi|ben[\W_]*dan|fei[\W_]*wu|hun[\W_]*dan|wang[\W_]*ba[\W_]*dan|gou[\W_]*shi|la[\W_]*ji
+cao[\W_]*ni[\W_]*ma
+cnm|nmsl|wcnm
